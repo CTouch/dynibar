@@ -1,8 +1,8 @@
 expname = kid-running-test
 
-rootdir = /home/zhengqili/dynibar
+rootdir = /data3/Touch/dynibar/
 
-folder_path = /home/zhengqili/release
+folder_path = /data3/Touch/data/NSFF_DATA/release/
 
 no_reload = False
 render_stride = 1
@@ -18,14 +18,14 @@ eval_dataset = monocular
 eval_scenes = kid-running
 
 ### TRAINING
-N_rand = 3072
+N_rand = 1024       
 lrate_feature = 8e-4
 lrate_mlp = 4e-4
 lrate_decay_factor = 0.5
 init_decay_epoch = 400 # modify this s.t. num_imgs * num_epoch ~= 30-40K
 
 ### TESTING
-chunk_size = 8192
+chunk_size = 1024
 
 ### RENDERING
 N_importance = 0

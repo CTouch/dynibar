@@ -29,12 +29,9 @@ class RaySamplerSingleImage(object):
     anchor_camera: camera parameters for input view at nearby cross time
     rgb: image at reference time
     src_rgbs: source view images w.r.t reference time for dynamic model
-    src_cameras: source view camera parameters w.r.t reference time for
-    dynamic model
-    anchor_src_rgbs: source view images w.r.t nearby cross time for dynamic
-    model.
-    anchor_src_cameras: source view camera parameters w.r.t 
-    nearby cross time for dynamic model.
+    src_cameras: source view camera parameters w.r.t reference time for dynamic model
+    anchor_src_rgbs: source view images w.r.t nearby cross time for dynamic model.
+    anchor_src_cameras: source view camera parameters w.r.t nearby cross time for dynamic model.
     static_src_rgbs: source view images for static model
     static_src_cameras: source view camera parameters for static model
     static_src_masks: dynamic masks of source views for static model
@@ -52,25 +49,18 @@ class RaySamplerSingleImage(object):
     self.rgb = data['rgb'] if 'rgb' in data.keys() else None
     self.disp = data['disp'] if 'disp' in data.keys() else None
 
-    self.motion_mask = (
-        data['motion_mask'] if 'motion_mask' in data.keys() else None
-    )
+    self.motion_mask = (data['motion_mask'] if 'motion_mask' in data.keys() else None)
 
-    self.static_mask = (
-        data['static_mask'] if 'static_mask' in data.keys() else None
-    )
+    self.static_mask = (data['static_mask'] if 'static_mask' in data.keys() else None)
 
     self.flows = data['flows'].squeeze(0) if 'flows' in data.keys() else None
     self.masks = data['masks'].squeeze(0) if 'masks' in data.keys() else None
 
     self.camera = data['camera']
-    self.render_camera = (
-        data['render_camera'] if 'render_camera' in data.keys() else None
-    )
+    self.render_camera = (data['render_camera'] if 'render_camera' in data.keys() else None)
 
-    self.anchor_camera = (
-        data['anchor_camera'] if 'anchor_camera' in data.keys() else None
-    )
+    self.anchor_camera = (data['anchor_camera'] if 'anchor_camera' in data.keys() else None)
+    
     self.rgb_path = data['rgb_path']
     self.depth_range = data['depth_range']
     self.device = device
@@ -149,14 +139,14 @@ class RaySamplerSingleImage(object):
     v = v.reshape(-1).astype(dtype=np.float32)
     pixels = np.stack((u, v, np.ones_like(u)), axis=0)  # (3, H*W)
     pixels = torch.from_numpy(pixels)
-    batched_pixels = pixels.unsqueeze(0).repeat(self.batch_size, 1, 1)
+    batched_pixels = pixels.unsqueeze(0).repeat(self.batch_size, 1, 1)      # TODO Check batch size = 1
 
     rays_d = (
         c2w[:, :3, :3]
         .bmm(torch.inverse(intrinsics[:, :3, :3]))
         .bmm(batched_pixels)
-    ).transpose(1, 2)
-    rays_d = rays_d.reshape(-1, 3)
+    ).transpose(1, 2)               # (B, 3, H*W)
+    rays_d = rays_d.reshape(-1, 3)  # TODO check (B*H*W, 3)
     rays_o = (
         c2w[:, :3, 3].unsqueeze(1).repeat(1, rays_d.shape[0], 1).reshape(-1, 3)
     )  # B x HW x 3

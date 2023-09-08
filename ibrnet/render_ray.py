@@ -123,7 +123,7 @@ def sample_along_camera_ray(
   ray_o = ray_o.unsqueeze(1).repeat(1, N_samples, 1)
   pts = z_vals.unsqueeze(2) * ray_d + ray_o  # [N_rays, N_samples, 3]
 
-  # from mip-nerf 360 normalized distance
+  # from mip-nerf 360 normalized distance   # TODO MIP-NERF 360
   s_vals = ((1.0 / z_vals) - (1.0 / near_depth_value)) / (
       1.0 / far_depth_value - 1.0 / near_depth_value
   )
@@ -974,7 +974,7 @@ def render_rays_mono(
         raw_coeff_y,
         raw_coeff_z,
         model.trajectory_basis[None, None, ref_frame_idx + offset, :],
-    )
+    )   # predict traj, TODO check models.trajectory_basis
 
     ref_traj_pts_dict[offset] = traj_pts_ref
 
@@ -986,7 +986,7 @@ def render_rays_mono(
 
   # adding src virtual views
   for _ in range(num_vv):
-    pts_3d_seq_ref.append(pts_ref)
+    pts_3d_seq_ref.append(pts_ref)      # TODO why copy original view?
 
   pts_3d_seq_ref = torch.stack(pts_3d_seq_ref, 0)
   pts_3d_static = pts_ref[None, ...].repeat(

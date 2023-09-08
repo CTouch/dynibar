@@ -92,13 +92,13 @@ def create_training_dataset(args):
   if '+' not in args.train_dataset:
     train_dataset = dataset_dict[args.train_dataset](
         args, mode, scenes=args.train_scenes
-    )
+    )   # create dataset (use one)
     train_sampler = (
         torch.utils.data.distributed.DistributedSampler(train_dataset)
         if args.distributed
         else None
     )
-  else:
+  else:   # use many dataset
     train_dataset_names = args.train_dataset.split('+')
     weights = args.dataset_weights
     assert len(train_dataset_names) == len(weights)

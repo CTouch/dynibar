@@ -39,8 +39,7 @@ class MonocularDataset(Dataset):
     static_src_rgbs: [..., H, W, 3] srouce view images for static model
     static_src_cameras: [..., 34] source view camera parameters for static model
     anchor_src_rgbs: [..., H, W, 3] cross-time view images for dynamic model
-    anchor_src_cameras: [..., 34] cross-time source view camera parameters for
-    dynamic model
+    anchor_src_cameras: [..., 34] cross-time source view camera parameters for dynamic model
     depth_range: [2] scene near and far bounds
   """
 
@@ -216,9 +215,7 @@ class MonocularDataset(Dataset):
     nearest_pose_ids = [idx + offset for offset in [1, 2, 3, -1, -2, -3]]
     max_step = min(3, self.current_epoch // (self.args.init_decay_epoch) + 1)
     # select a nearby time index for cross time rendering
-    anchor_pool = [i for i in range(1, max_step + 1)] + [
-        -i for i in range(1, max_step + 1)
-    ]
+    anchor_pool = [i for i in range(1, max_step + 1)] + [-i for i in range(1, max_step + 1)]
     anchor_idx = idx + anchor_pool[np.random.choice(len(anchor_pool))]
     anchor_nearest_pose_ids = []
 

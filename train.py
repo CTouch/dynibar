@@ -74,7 +74,7 @@ def train(args):
       shutil.copy(args.config, f)
 
   # create training dataset
-  train_dataset, train_sampler = create_training_dataset(args)
+  train_dataset, train_sampler = create_training_dataset(args)          # train_sampler == None when not distribute
   # currently only support batch_size=1 
   # (i.e., one set of target and source views) for each GPU node
   # please use distributed parallel on multiple GPUs to train multiple 
@@ -118,13 +118,11 @@ def train(args):
     print('================ Static Boostrap ', epoch)
 
     for ii, train_data in enumerate(train_loader):
-      ref_time_embedding = train_data['ref_time'].to(device)
-      anchor_time_embedding = train_data['anchor_time'].to(device)
+      ref_time_embedding = train_data['ref_time'].to(device)        # normalized reference time index
+      anchor_time_embedding = train_data['anchor_time'].to(device)  # normalized nearby cross-time index
 
-      nearest_pose_ids = train_data['nearest_pose_ids'].squeeze().tolist()
-      anchor_nearest_pose_ids = (
-          train_data['anchor_nearest_pose_ids'].squeeze().tolist()
-      )
+      nearest_pose_ids = train_data['nearest_pose_ids'].squeeze().tolist() # source view index w.r.t reference time
+      anchor_nearest_pose_ids = (train_data['anchor_nearest_pose_ids'].squeeze().tolist())
 
       ref_frame_idx = int(train_data['id'].item())
       anchor_frame_idx = int(train_data['anchor_id'].item())
@@ -136,7 +134,7 @@ def train(args):
           int(near_idx - anchor_frame_idx)
           for near_idx in anchor_nearest_pose_ids
       ]
-      num_dy_views = len(ref_time_offset) + args.num_vv  # hard-code here!
+      num_dy_views = len(ref_time_offset) + args.num_vv  # TODO hard-code what? hard-code here!
 
       # load training rays
       ray_sampler = RaySamplerSingleImage(train_data, device)
@@ -151,7 +149,7 @@ def train(args):
           [
               ray_batch['src_rgbs'].squeeze(0).permute(0, 3, 1, 2),
               ray_batch['anchor_src_rgbs'].squeeze(0).permute(0, 3, 1, 2),
-          ],
+          ],    # TODO why permute?
           dim=0,
       )
 

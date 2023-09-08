@@ -104,15 +104,9 @@ class DynibarFF(object):
     out_folder = os.path.join(args.rootdir, 'checkpoints/fine', args.expname)
 
     self.optimizer = torch.optim.Adam([
-        {
-            'params': self.net_fine_st.parameters(),
-            'lr': args.lrate_mlp * args.lr_multipler,
-        },
+        {'params': self.net_fine_st.parameters(), 'lr': args.lrate_mlp * args.lr_multipler},
         {'params': self.net_fine_dy.parameters(), 'lr': args.lrate_mlp},
-        {
-            'params': self.feature_net_fine.parameters(),
-            'lr': args.lrate_feature,
-        },
+        {'params': self.feature_net_fine.parameters(), 'lr': args.lrate_feature},
         {'params': self.motion_mlp_fine.parameters(), 'lr': args.lrate_mlp},
         {'params': self.trajectory_basis_fine, 'lr': args.lrate_mlp * 0.25},
     ])
@@ -340,10 +334,7 @@ class DynibarMono(object):
 
     self.optimizer = torch.optim.Adam([
         {'params': self.net_coarse_st.parameters(), 'lr': args.lrate_mlp * 0.5},
-        {
-            'params': self.feature_net_st.parameters(),
-            'lr': args.lrate_feature * 0.5,
-        },
+        {'params': self.feature_net_st.parameters(), 'lr': args.lrate_feature * 0.5},
         {'params': self.net_coarse_dy.parameters(), 'lr': args.lrate_mlp},
         {'params': self.feature_net.parameters(), 'lr': args.lrate_feature},
         {'params': self.motion_mlp.parameters(), 'lr': args.lrate_mlp},
