@@ -913,6 +913,9 @@ def render_rays_mono(
     outputs_coarse_ref_dy: coarse dynamic model output from reference time
     outputs_coarse_st: coarse static model output from reference time
 
+    raw_coarse_ref: coarse dynamic density and color from reference time
+    raw_coarse_st: coarse static density and color from reference time
+
   """
   # weights used in cross-time rendering.
   #   0: rendering by compositing both models if time interval == 1,
@@ -1050,8 +1053,8 @@ def render_rays_mono(
 
   raw_coarse_static = model.net_coarse_st(
       pts_ref,
-      ref_rays_coords,
-      src_rays_coords,
+      ref_rays_coords,      # check this TODO
+      src_rays_coords,      # check thie TODO
       rgb_feat_static,
       input_ray_dir,
       ray_diff_static,
@@ -1274,4 +1277,9 @@ def render_rays_mono(
   ret['outputs_coarse_ref_dy'] = outputs_coarse_ref_dy
   ret['outputs_coarse_st'] = outputs_coarse_st
 
+  ret['raw_coarse_ref'] = raw_coarse_ref
+  ret['raw_coarse_static'] = raw_coarse_static
+  ret['mask_ref'] = mask_ref
+  ret['mask_static'] = mask_static
+  ret['pts_ref'] = pts_ref
   return ret

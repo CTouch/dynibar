@@ -1,4 +1,4 @@
-name: dynibar
+name: dynibar-cuda10.2
 channels:
   - pytorch
   - conda-forge
@@ -6,7 +6,7 @@ channels:
 dependencies:
   - python=3.8
   - pip=20.3
-  - conda-forge::cudatoolkit=11.3
+  - conda-forge::cudatoolkit=10.2
   - pytorch::pytorch=1.10.1
   - pytorch::torchvision==0.11.2
   - pip:

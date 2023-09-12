@@ -338,7 +338,23 @@ def render_single_image_mono(
       else:
         for k in ret['outputs_fine']:
           all_ret['outputs_fine'][k] = []
+      
+      all_ret['raw_coarse_ref'] = []  
+      all_ret['raw_coarse_static'] = []
 
+      all_ret['mask_ref'] = []
+      all_ret['mask_static'] = []
+
+      all_ret['pts_ref'] = []
+      
+    all_ret['raw_coarse_ref'].append(ret['raw_coarse_ref'])
+    all_ret['raw_coarse_static'].append(ret['raw_coarse_static'])
+
+    all_ret['mask_ref'].append(ret['mask_ref'])
+    all_ret['mask_static'].append(ret['mask_static'])
+
+    all_ret['pts_ref'].append(ret['pts_ref'])
+    
     for k in ret['outputs_coarse_ref']:
       all_ret['outputs_coarse_ref'][k].append(
           ret['outputs_coarse_ref'][k].cpu()
@@ -360,6 +376,16 @@ def render_single_image_mono(
   rgb_strided = torch.ones(ray_sampler.H, ray_sampler.W, 3)[
       ::render_stride, ::render_stride, :
   ]
+  
+  # merge
+  all_ret['raw_coarse_ref'] = torch.cat(all_ret['raw_coarse_ref'], dim=0)
+  all_ret['raw_coarse_static'] = torch.cat(all_ret['raw_coarse_static'], dim=0)
+
+  all_ret['mask_ref'] = torch.cat(all_ret['mask_ref'], dim=0)
+  all_ret['mask_static'] = torch.cat(all_ret['mask_static'], dim=0)
+
+  all_ret['pts_ref'] = torch.cat(all_ret['pts_ref'], dim=0)
+  
   # merge chunk results and reshape
   for k in all_ret['outputs_coarse_ref']:
     if k == 'random_sigma':

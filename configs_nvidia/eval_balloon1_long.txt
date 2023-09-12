@@ -1,8 +1,8 @@
 expname = balloon1
 
-rootdir = /home/zhengqili/dynibar
+rootdir = /data3/Touch/dynibar
 
-folder_path = /home/zhengqili/nvidia_long_release
+folder_path = /data3/Touch/data/NSFF_DATA/nvidia_long_release
 
 coarse_dir = checkpoints/coarse/balloon1
 

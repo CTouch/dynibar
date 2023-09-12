@@ -149,7 +149,7 @@ def train(args):
           [
               ray_batch['src_rgbs'].squeeze(0).permute(0, 3, 1, 2),
               ray_batch['anchor_src_rgbs'].squeeze(0).permute(0, 3, 1, 2),
-          ],    # TODO why permute?
+          ],    # [n_views, 3, h, w]
           dim=0,
       )
 

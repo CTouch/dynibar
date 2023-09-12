@@ -287,6 +287,11 @@ if __name__ == '__main__':
   os.makedirs(out_scene_dir, exist_ok=True)
   os.makedirs(os.path.join(out_scene_dir, 'rgb_out'), exist_ok=True)
 
+  if args.output_density_and_color:
+      os.makedirs(os.path.join(out_scene_dir, 'raw_coarse_ref'), exist_ok=True)
+      os.makedirs(os.path.join(out_scene_dir, 'raw_coarse_st'), exist_ok=True)
+      os.makedirs(os.path.join(out_scene_dir, 'pts_ref'), exist_ok=True)
+
   save_prefix = scene_name
   test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
   total_num = len(test_loader)
@@ -362,5 +367,26 @@ if __name__ == '__main__':
 
     imageio.imwrite(os.path.join(out_scene_dir, 'rgb_out', '{}.png'.format(i)),
                     coarse_pred_rgb)
+
+    if args.output_density_and_color:
+      raw_coarse_ref_path = os.path.join(out_scene_dir, 'raw_coarse_ref', 'raw_coarse_ref_{}.npy'.format(i))
+      raw_coarse_ref = ret['raw_coarse_ref'].detach().cpu().numpy()
+      np.save(raw_coarse_ref_path, raw_coarse_ref)
+
+      raw_coarse_st_path = os.path.join(out_scene_dir, 'raw_coarse_st', 'raw_coarse_st_{}.npy'.format(i))
+      raw_coarse_st = ret['raw_coarse_static'].detach().cpu().numpy()
+      np.save(raw_coarse_st_path, raw_coarse_st)
+      
+      mask_ref = ret['mask_ref'].detach().cpu().numpy()
+      mask_ref_path = os.path.join(out_scene_dir, 'raw_coarse_ref', 'mask_ref_{}.npy'.format(i))
+      np.save(mask_ref_path, mask_ref)
+
+      mask_static = ret['mask_static'].detach().cpu().numpy()
+      mask_static_path = os.path.join(out_scene_dir, 'raw_coarse_st', 'mask_static_{}.npy'.format(i))
+      np.save(mask_static_path, mask_static)
+      
+      pts_ref = ret['pts_ref'].detach().cpu().numpy()
+      pts_ref_path = os.path.join(out_scene_dir, 'pts_ref', 'pts_ref_{}.npy'.format(i))
+      np.save(pts_ref_path, pts_ref)
 
     print('frame {} completed, {}'.format(i, time.time() - start))

@@ -355,6 +355,14 @@ def config_parser():
       default=1,
       help='Render with large stride for validation to save time',
   )
+  
+  parser.add_argument(
+      '--output_density_and_color',
+      type=bool,
+      default=False,
+      help='Flag for whether output density and color'
+  )
+  
   ########## logging/saving options ##########
   parser.add_argument(
       '--i_print', type=int, default=100, help='Frequency of terminal printout'
