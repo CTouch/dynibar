@@ -319,6 +319,7 @@ def raw2outputs(
       ('rgb_dy', rgb_map_dy),
       ('depth', depth_map),
       ('alpha_dy', alpha_dy),
+      ('alpha_static', alpha_static),
       ('weights_dy', weights_dy),
       ('weights_st', weights_static),
       ('alpha', alpha),
@@ -1276,10 +1277,11 @@ def render_rays_mono(
   ret['outputs_coarse_ref'] = outputs_coarse_ref
   ret['outputs_coarse_ref_dy'] = outputs_coarse_ref_dy
   ret['outputs_coarse_st'] = outputs_coarse_st
-
-  ret['raw_coarse_ref'] = raw_coarse_ref
-  ret['raw_coarse_static'] = raw_coarse_static
-  ret['mask_ref'] = mask_ref
-  ret['mask_static'] = mask_static
-  ret['pts_ref'] = pts_ref
+  
+  if args.output_density_and_color:
+    ret['raw_coarse_ref'] = raw_coarse_ref
+    ret['raw_coarse_static'] = raw_coarse_static
+    ret['mask_ref'] = mask_ref
+    ret['mask_static'] = mask_static
+    ret['pts_ref'] = pts_ref
   return ret

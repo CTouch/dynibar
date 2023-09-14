@@ -338,22 +338,35 @@ def render_single_image_mono(
       else:
         for k in ret['outputs_fine']:
           all_ret['outputs_fine'][k] = []
+      if args.output_density_and_color:
+        all_ret['raw_coarse_ref'] = []  
+        all_ret['raw_coarse_static'] = []
+
+        all_ret['alpha_dy'] = []
+        all_ret['alpha_st'] = []
+
+        all_ret['weights_dy'] = []
+        all_ret['weights_st'] = []
+
+        all_ret['mask_ref'] = []
+        all_ret['mask_static'] = []
+
+        all_ret['pts_ref'] = []
       
-      all_ret['raw_coarse_ref'] = []  
-      all_ret['raw_coarse_static'] = []
+    if args.output_density_and_color:
+      all_ret['raw_coarse_ref'].append(ret['raw_coarse_ref'])
+      all_ret['raw_coarse_static'].append(ret['raw_coarse_static'])
 
-      all_ret['mask_ref'] = []
-      all_ret['mask_static'] = []
+      all_ret['alpha_dy'].append(ret['outputs_coarse_ref_dy']['alpha'])
+      all_ret['alpha_st'].append(ret['outputs_coarse_st']['alpha'])
 
-      all_ret['pts_ref'] = []
+      all_ret['weights_dy'].append(ret['outputs_coarse_ref_dy']['weights'])
+      all_ret['weights_st'].append(ret['outputs_coarse_st']['weights'])
       
-    all_ret['raw_coarse_ref'].append(ret['raw_coarse_ref'])
-    all_ret['raw_coarse_static'].append(ret['raw_coarse_static'])
+      all_ret['mask_ref'].append(ret['mask_ref'])
+      all_ret['mask_static'].append(ret['mask_static'])
 
-    all_ret['mask_ref'].append(ret['mask_ref'])
-    all_ret['mask_static'].append(ret['mask_static'])
-
-    all_ret['pts_ref'].append(ret['pts_ref'])
+      all_ret['pts_ref'].append(ret['pts_ref'])
     
     for k in ret['outputs_coarse_ref']:
       all_ret['outputs_coarse_ref'][k].append(
@@ -378,13 +391,20 @@ def render_single_image_mono(
   ]
   
   # merge
-  all_ret['raw_coarse_ref'] = torch.cat(all_ret['raw_coarse_ref'], dim=0)
-  all_ret['raw_coarse_static'] = torch.cat(all_ret['raw_coarse_static'], dim=0)
+  if args.output_density_and_color:
+    all_ret['raw_coarse_ref'] = torch.cat(all_ret['raw_coarse_ref'], dim=0)
+    all_ret['raw_coarse_static'] = torch.cat(all_ret['raw_coarse_static'], dim=0)
 
-  all_ret['mask_ref'] = torch.cat(all_ret['mask_ref'], dim=0)
-  all_ret['mask_static'] = torch.cat(all_ret['mask_static'], dim=0)
+    all_ret['mask_ref'] = torch.cat(all_ret['mask_ref'], dim=0)
+    all_ret['mask_static'] = torch.cat(all_ret['mask_static'], dim=0)
 
-  all_ret['pts_ref'] = torch.cat(all_ret['pts_ref'], dim=0)
+    all_ret['alpha_dy'] = torch.cat(all_ret['alpha_dy'], dim=0)
+    all_ret['alpha_st'] = torch.cat(all_ret['alpha_st'], dim=0)
+
+    all_ret['weights_dy'] = torch.cat(all_ret['weights_dy'], dim=0)
+    all_ret['weights_st'] = torch.cat(all_ret['weights_st'], dim=0)
+
+    all_ret['pts_ref'] = torch.cat(all_ret['pts_ref'], dim=0)
   
   # merge chunk results and reshape
   for k in all_ret['outputs_coarse_ref']:

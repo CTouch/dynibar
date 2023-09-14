@@ -291,6 +291,10 @@ if __name__ == '__main__':
       os.makedirs(os.path.join(out_scene_dir, 'raw_coarse_ref'), exist_ok=True)
       os.makedirs(os.path.join(out_scene_dir, 'raw_coarse_st'), exist_ok=True)
       os.makedirs(os.path.join(out_scene_dir, 'pts_ref'), exist_ok=True)
+      os.makedirs(os.path.join(out_scene_dir, 'alpha_dy'), exist_ok=True)
+      os.makedirs(os.path.join(out_scene_dir, 'alpha_st'), exist_ok=True)
+      os.makedirs(os.path.join(out_scene_dir, 'weights_dy'), exist_ok=True)
+      os.makedirs(os.path.join(out_scene_dir, 'weights_st'), exist_ok=True)
 
   save_prefix = scene_name
   test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
@@ -377,16 +381,34 @@ if __name__ == '__main__':
       raw_coarse_st = ret['raw_coarse_static'].detach().cpu().numpy()
       np.save(raw_coarse_st_path, raw_coarse_st)
       
-      mask_ref = ret['mask_ref'].detach().cpu().numpy()
-      mask_ref_path = os.path.join(out_scene_dir, 'raw_coarse_ref', 'mask_ref_{}.npy'.format(i))
-      np.save(mask_ref_path, mask_ref)
+      # mask_ref = ret['mask_ref'].detach().cpu().numpy()
+      # mask_ref_path = os.path.join(out_scene_dir, 'raw_coarse_ref', 'mask_ref_{}.npy'.format(i))
+      # np.save(mask_ref_path, mask_ref)
 
-      mask_static = ret['mask_static'].detach().cpu().numpy()
-      mask_static_path = os.path.join(out_scene_dir, 'raw_coarse_st', 'mask_static_{}.npy'.format(i))
-      np.save(mask_static_path, mask_static)
+      # mask_static = ret['mask_static'].detach().cpu().numpy()
+      # mask_static_path = os.path.join(out_scene_dir, 'raw_coarse_st', 'mask_static_{}.npy'.format(i))
+      # np.save(mask_static_path, mask_static)
+      
+      alpha_dy = ret['alpha_dy'].detach().cpu().numpy()
+      alpha_dy_path = os.path.join(out_scene_dir, 'alpha_dy', 'alpha_dy_{}.npy'.format(i))
+      np.save(alpha_dy_path, alpha_dy)
+
+      alpha_st = ret['alpha_st'].detach().cpu().numpy()
+      alpha_st_path = os.path.join(out_scene_dir, 'alpha_st', 'alpha_st_{}.npy'.format(i))
+      np.save(alpha_st_path, alpha_st)
+      
+      weights_st = ret['weights_st'].detach().cpu().numpy()
+      weights_st_path = os.path.join(out_scene_dir, 'weights_st', 'weights_st_{}.npy'.format(i))
+      np.save(weights_st_path, weights_st)
+      
+      weights_dy = ret['weights_dy'].detach().cpu().numpy()
+      weights_dy_path = os.path.join(out_scene_dir, 'weights_dy', 'weights_dy_{}.npy'.format(i))
+      np.save(weights_dy_path, weights_dy)
       
       pts_ref = ret['pts_ref'].detach().cpu().numpy()
       pts_ref_path = os.path.join(out_scene_dir, 'pts_ref', 'pts_ref_{}.npy'.format(i))
       np.save(pts_ref_path, pts_ref)
+      
+      
 
     print('frame {} completed, {}'.format(i, time.time() - start))
