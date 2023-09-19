@@ -419,7 +419,16 @@ def train(args):
       distortion_loss = w_distortion * eff_distloss_native(
           ret['outputs_coarse_ref']['weights'][:, :-1], mid_dist, interval
       )
-
+      
+      if args.use_sep_weight_loss:
+        distortion_dy_loss = w_distortion * eff_distloss_native(
+            ret['outputs_coarse_ref']['weights_dy'][:, :-1], mid_dist, interval
+        )
+        distortion_st_loss = w_distortion * eff_distloss_native(
+            ret['outputs_coarse_ref']['weights_st'][:, :-1], mid_dist, interval
+        )
+        # distortion_loss += distortion_dr_loss + distortion_st_loss
+        
       # adaptive weight based on current esimtate of decompsotion
       static_static_mask = 1.0 - ray_batch['static_mask'].float()
       static_static_mask *= ret['outputs_coarse_ref']['mask'].float()
@@ -460,7 +469,11 @@ def train(args):
       scalars_to_log['distortion_loss'] = distortion_loss.item()
       scalars_to_log['entropy_loss'] = entropy_loss.item()
       scalars_to_log['static_loss'] = static_loss.item()
-
+      if args.use_sep_weight_loss:
+          scalars_to_log['distortion_dy_loss'] = distortion_dy_loss.item()
+          scalars_to_log['distortion_st_loss'] = distortion_st_loss.item()
+          
+          
       loss.backward()
       model.optimizer.step()
 
@@ -491,6 +504,10 @@ def train(args):
             'distortion_loss ', scalars_to_log['distortion_loss'],
             ' static_loss ', scalars_to_log['static_loss']
         )
+        if args.use_sep_weight_loss:
+          print('distortion_dy_loss', scalars_to_log['distortion_dy_loss'])
+          print('distortion_st_loss', scalars_to_log['distortion_st_loss'])
+          
         print(' divisor ', divisor)  # , ' var_reg_loss ', var_reg_loss.item())
         print(
             'epoch %d global_step %d' % (epoch, global_step),

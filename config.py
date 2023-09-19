@@ -216,6 +216,15 @@ def config_parser():
           ' static model'
       ),
   )
+  
+  parser.add_argument(
+      '--use_sep_weight_loss',
+      type=bool,
+      default=False,
+      help=(
+          'Add seperate (sum dynamic and static) weight loss while training'
+      )
+  )
 
   ########## checkpoints ##########
   parser.add_argument(

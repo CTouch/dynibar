@@ -12,7 +12,7 @@ distributed = False
 eval_dataset = Nvidia
 eval_scenes = Balloon1
 ### TESTING
-chunk_size = 8192
+chunk_size = 4096
 
 ### RENDERING
 N_importance = 64
