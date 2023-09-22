@@ -458,12 +458,13 @@ def train(args):
           + disp_loss
           + reg_loss
           + entropy_loss
-          + distortion_loss
           + static_loss
       )
 
-      if args.use_sep_weights_loss:
+      if args.use_sep_weight_loss:
         loss += distortion_dy_loss + distortion_st_loss
+      else:
+        loss += distortion_loss
 
       scalars_to_log['loss'] = loss.item()
       scalars_to_log['flow_loss'] = flow_loss.item()

@@ -66,6 +66,12 @@ class DynamicVideoDataset(Dataset):
             load_imgs=False,
         )
     )
+    
+    if self.render_idx == -2:
+      self.render_idx = list(range(len(rgb_files)))
+      # self.render_idx = self.render_idx[3:-3]
+      assert(len(self.render_idx) == len(render_poses))
+    
     near_depth = np.min(bds)
 
     if np.max(bds) < 10:
@@ -110,9 +116,14 @@ class DynamicVideoDataset(Dataset):
         ([h, w], intrinsics.flatten(), render_pose.flatten())
     ).astype(np.float32)
 
-    nearest_pose_ids = np.sort(
-        [self.render_idx + offset for offset in [1, 2, 3, 0, -1, -2, -3]]
-    )
+    if isinstance(self.render_idx, list):
+      nearest_pose_ids = np.sort(
+        [self.render_idx[idx] + offset for offset in [1, 2, 3, 0, -1, -2, -3]]
+      )
+    else:
+      nearest_pose_ids = np.sort(
+          [self.render_idx + offset for offset in [1, 2, 3, 0, -1, -2, -3]]
+      )
     sp_pose_ids = get_nearest_pose_ids(
         render_pose, train_poses, tar_id=-1, angular_dist_method='dist'
     )
@@ -126,12 +137,17 @@ class DynamicVideoDataset(Dataset):
         angular_dist_method='dist',
         interval=frame_interval,
     )
-
+    
+    if isinstance(self.render_idx, list):
+      cur_render_idx = self.render_idx[idx]
+    else:
+      cur_render_idx = self.render_idx
+      
     for sp_pose_id in interval_pose_ids:
       if len(static_pose_ids) >= (self.num_source_views * 2 + 1):
         break
-
-      if np.abs(sp_pose_id - self.render_idx) > (
+      
+      if np.abs(sp_pose_id - cur_render_idx) > (
           self.max_range + self.num_source_views * 0.5
       ):
         continue
@@ -156,6 +172,8 @@ class DynamicVideoDataset(Dataset):
 
     src_rgbs = []
     src_cameras = []
+    # print(f'nearest_pose_ids = {nearest_pose_ids}')
+    # print(f'train_rgb_files = {train_rgb_files}')
     for src_idx in nearest_pose_ids:
       src_rgb = (
           imageio.imread(train_rgb_files[src_idx]).astype(np.float32) / 255.0
@@ -173,7 +191,8 @@ class DynamicVideoDataset(Dataset):
     # load src virtual views
     vv_pose_ids = get_nearest_pose_ids(
         render_pose,
-        self.src_vv_c2w_mats[self.render_idx],
+        # self.src_vv_c2w_mats[self.render_idx],
+        self.src_vv_c2w_mats[cur_render_idx],
         tar_id=-1,
         angular_dist_method='dist',
     )
@@ -185,7 +204,7 @@ class DynamicVideoDataset(Dataset):
           '/'.join(
               rgb_file.replace('images', 'source_virtual_views').split('/')[:-1]
           ),
-          '%05d' % self.render_idx,
+          '%05d' % cur_render_idx,
           '%02d.png' % virtual_idx,
       )
       src_rgb = imageio.imread(src_vv_path).astype(np.float32) / 255.0
@@ -195,7 +214,7 @@ class DynamicVideoDataset(Dataset):
       src_camera = np.concatenate((
           list(img_size),
           intrinsics.flatten(),
-          self.src_vv_c2w_mats[self.render_idx, virtual_idx].flatten(),
+          self.src_vv_c2w_mats[cur_render_idx, virtual_idx].flatten(),
       )).astype(np.float32)
 
       src_cameras.append(src_camera)
@@ -253,8 +272,8 @@ class DynamicVideoDataset(Dataset):
         'static_src_rgbs': torch.from_numpy(static_src_rgbs[..., :3]).float(),
         'static_src_cameras': torch.from_numpy(static_src_cameras).float(),
         'depth_range': depth_range,
-        'ref_time': float(self.render_idx / float(self.num_frames)),
-        'id': self.render_idx,
+        'ref_time': float(cur_render_idx / float(self.num_frames)),
+        'id': cur_render_idx,
         'nearest_pose_ids': nearest_pose_ids
         }
 
@@ -286,15 +305,17 @@ if __name__ == '__main__':
 
   os.makedirs(out_scene_dir, exist_ok=True)
   os.makedirs(os.path.join(out_scene_dir, 'rgb_out'), exist_ok=True)
+  os.makedirs(os.path.join(out_scene_dir, 'rgb_dr_out'), exist_ok=True)
+  os.makedirs(os.path.join(out_scene_dir, 'rgb_st_out'), exist_ok=True)
 
   if args.output_density_and_color:
-      os.makedirs(os.path.join(out_scene_dir, 'raw_coarse_ref'), exist_ok=True)
-      os.makedirs(os.path.join(out_scene_dir, 'raw_coarse_st'), exist_ok=True)
-      os.makedirs(os.path.join(out_scene_dir, 'pts_ref'), exist_ok=True)
-      os.makedirs(os.path.join(out_scene_dir, 'alpha_dy'), exist_ok=True)
-      os.makedirs(os.path.join(out_scene_dir, 'alpha_st'), exist_ok=True)
-      os.makedirs(os.path.join(out_scene_dir, 'weights_dy'), exist_ok=True)
-      os.makedirs(os.path.join(out_scene_dir, 'weights_st'), exist_ok=True)
+    os.makedirs(os.path.join(out_scene_dir, 'raw_coarse_ref'), exist_ok=True)
+    os.makedirs(os.path.join(out_scene_dir, 'raw_coarse_st'), exist_ok=True)
+    os.makedirs(os.path.join(out_scene_dir, 'pts_ref'), exist_ok=True)
+    os.makedirs(os.path.join(out_scene_dir, 'alpha_dy'), exist_ok=True)
+    os.makedirs(os.path.join(out_scene_dir, 'alpha_st'), exist_ok=True)
+    os.makedirs(os.path.join(out_scene_dir, 'weights_dy'), exist_ok=True)
+    os.makedirs(os.path.join(out_scene_dir, 'weights_st'), exist_ok=True)
 
   save_prefix = scene_name
   test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
@@ -309,8 +330,8 @@ if __name__ == '__main__':
     ref_time_embedding = data['ref_time'].cuda()
     ref_frame_idx = int(data['id'].item())
     ref_time_offset = [
-        int(near_idx - ref_frame_idx)
-        for near_idx in data['nearest_pose_ids'].squeeze().tolist()
+      int(near_idx - ref_frame_idx)
+      for near_idx in data['nearest_pose_ids'].squeeze().tolist()
     ]
 
     model.switch_to_eval()
@@ -350,27 +371,41 @@ if __name__ == '__main__':
 
     coarse_pred_rgb = ret['outputs_coarse_ref']['rgb'].detach().cpu()
     coarse_pred_rgb_st = ret['outputs_coarse_ref']['rgb_static'].detach().cpu()
-    coarse_pred_rgb_rgb = ret['outputs_coarse_ref']['rgb_dy'].detach().cpu()
+    coarse_pred_rgb_dy = ret['outputs_coarse_ref']['rgb_dy'].detach().cpu()
 
     coarse_pred_rgb = (
         255 * np.clip(coarse_pred_rgb.numpy(), a_min=0, a_max=1.0)
+    ).astype(np.uint8)
+    coarse_pred_rgb_dy = (
+        255 * np.clip(coarse_pred_rgb_dy.numpy(), a_min=0, a_max=1.0)
+    ).astype(np.uint8)
+    coarse_pred_rgb_st = (
+        255 * np.clip(coarse_pred_rgb_st.numpy(), a_min=0, a_max=1.0)
     ).astype(np.uint8)
 
     h, w = coarse_pred_rgb.shape[:2]
     crop_h = int(h * crop_ratio)
     crop_w = int(w * crop_ratio)
 
-    coarse_pred_rgb = coarse_pred_rgb[crop_h:h-crop_h, crop_w:w-crop_w, ...]
+    # coarse_pred_rgb = coarse_pred_rgb[crop_h:h-crop_h, crop_w:w-crop_w, ...]
+    # coarse_pred_rgb_st = coarse_pred_rgb_st[crop_h:h-crop_h, crop_w:w-crop_w, ...]
+    # coarse_pred_rgb_dy = coarse_pred_rgb_dy[crop_h:h-crop_h, crop_w:w-crop_w, ...]
 
-    gt_rgb = data['rgb'][0, crop_h:h-crop_h, crop_w:w-crop_w, ...]
-    gt_rgb = (255 * np.clip(gt_rgb.numpy(), a_min=0, a_max=1.)).astype(np.uint8)
+    # gt_rgb = data['rgb'][0, crop_h:h-crop_h, crop_w:w-crop_w, ...]
+    # gt_rgb = (255 * np.clip(gt_rgb.numpy(), a_min=0, a_max=1.)).astype(np.uint8)
 
-    full_rgb = np.concatenate([gt_rgb, coarse_pred_rgb], axis=1)
+    # full_rgb = np.concatenate([gt_rgb, coarse_pred_rgb], axis=1)
 
-    full_frames.append(coarse_pred_rgb)
+    # full_frames.append(coarse_pred_rgb)
 
     imageio.imwrite(os.path.join(out_scene_dir, 'rgb_out', '{}.png'.format(i)),
                     coarse_pred_rgb)
+    imageio.imwrite(os.path.join(out_scene_dir, 'rgb_dr_out', '{}.png'.format(i)),
+                    coarse_pred_rgb_dy)
+    imageio.imwrite(os.path.join(out_scene_dir, 'rgb_st_out', '{}.png'.format(i)),
+                    coarse_pred_rgb_st)
+    
+    
 
     if args.output_density_and_color:
       raw_coarse_ref_path = os.path.join(out_scene_dir, 'raw_coarse_ref', 'raw_coarse_ref_{}.npy'.format(i))

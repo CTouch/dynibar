@@ -933,7 +933,7 @@ def render_rays_mono(
       time_embedding[1],
   )
   ref_time_offset, anchor_time_offset = time_offset[0], time_offset[1]
-  num_frames = int(ref_frame_idx / ref_time_embedding)
+#   num_frames = int(ref_frame_idx / ref_time_embedding)
 
   input_ray_dir = F.normalize(ray_batch['ray_d'], dim=-1)
 

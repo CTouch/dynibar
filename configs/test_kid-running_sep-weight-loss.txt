@@ -1,6 +1,5 @@
 # make sure expname is the saved folder name in 'out' directory
 expname = kid-running-test-sep-weight-loss_mr-42_w-disp-0.100_w-flow-0.010_anneal_cycle-0.1-0.1-w_mode-0
-
 rootdir = /data3/Touch/dynibar/
 
 folder_path = /data3/Touch/data/NSFF_DATA/release/

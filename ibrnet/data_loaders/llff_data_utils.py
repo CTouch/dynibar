@@ -397,6 +397,8 @@ def load_mono_data(
 
   if render_idx >= 0:
     render_poses = render_wander_path(poses[render_idx])
+  elif render_idx == -2:
+    render_poses = render_translate_path(poses)
   else:
     render_poses = render_stabilization_path(poses, k_size=45)
 
@@ -447,6 +449,51 @@ def render_wander_path(c2w):
     render_pose = np.dot(ref_pose, i_pose)
     output_poses.append(np.concatenate([render_pose[:3, :], hwf], 1))
 
+  return output_poses
+
+def render_translate_path(poses):
+  """Rendering tranlate path from original path
+
+  Args:
+      poses (_type_): orignal camera poses
+  """
+  
+  print("Rendering tranlate path from original path")
+  hwf = poses[0, :, 4:5]
+  num_frames = poses.shape[0]
+  
+  max_disp = 48.0
+  max_trans = max_disp / hwf[2][0]
+
+  output_poses = []
+  for i in range(num_frames):
+    x_trans = max_trans #max_trans * np.sin(2.0 * np.pi * float(i) / float(num_frames))
+    y_trans = 0.#max_trans * np.cos(2.0 * np.pi * float(i) / float(num_frames)) / 2.
+    z_trans = 0.#max_trans * np.cos(2.0 * np.pi * float(i) / float(num_frames)) / 2.
+
+    i_pose = np.concatenate(
+        [
+            np.concatenate(
+                [
+                    np.eye(3),
+                    np.array([x_trans, y_trans, z_trans])[:, np.newaxis],
+                ],
+                axis=1,
+            ),
+            np.array([0.0, 0.0, 0.0, 1.0])[np.newaxis, :],
+        ],
+        axis=0,
+    )
+    i_pose = np.linalg.inv(i_pose)
+    
+    c2w = poses[i]
+    ref_pose = np.concatenate(
+        [c2w[:3, :4], np.array([0.0, 0.0, 0.0, 1.0])[np.newaxis, :]], axis=0
+    )
+
+    render_pose = np.dot(ref_pose, i_pose)
+    output_poses.append(np.concatenate([render_pose[:3, :], hwf], 1))
+  # output_poses = output_poses[3:-3]
   return output_poses
 
 
