@@ -64,6 +64,7 @@ class DynamicVideoDataset(Dataset):
             height=args.training_height,
             render_idx=self.render_idx,
             load_imgs=False,
+            view_trans_x=args.view_trans_x
         )
     )
     

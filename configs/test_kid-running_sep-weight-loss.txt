@@ -28,7 +28,8 @@ training_height = 288
 max_range = 40
 num_source_views = 7
 
-render_idx = 26
+render_idx = -2
+view_trans_x = 0.061
 
 mask_src_view = True
 num_vv = 3

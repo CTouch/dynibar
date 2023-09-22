@@ -327,6 +327,7 @@ def load_mono_data(
     bd_factor=0.75,
     spherify=False,
     load_imgs=True,
+    view_trans_x = -1
 ):
   """Load monocular video data.
   
@@ -398,7 +399,7 @@ def load_mono_data(
   if render_idx >= 0:
     render_poses = render_wander_path(poses[render_idx])
   elif render_idx == -2:
-    render_poses = render_translate_path(poses)
+    render_poses = render_translate_path(poses, view_trans_x)
   else:
     render_poses = render_stabilization_path(poses, k_size=45)
 
@@ -451,23 +452,25 @@ def render_wander_path(c2w):
 
   return output_poses
 
-def render_translate_path(poses):
+def render_translate_path(poses, view_trans_x):
   """Rendering tranlate path from original path
 
   Args:
       poses (_type_): orignal camera poses
   """
-  
   print("Rendering tranlate path from original path")
+  
+  assert(abs(view_trans_x) < 0.5)
   hwf = poses[0, :, 4:5]
   num_frames = poses.shape[0]
   
-  max_disp = 48.0
-  max_trans = max_disp / hwf[2][0]
+  # max_disp = 48.0
+  # max_trans = max_disp / hwf[2][0]
+  # max_trans = 0.061
 
   output_poses = []
   for i in range(num_frames):
-    x_trans = max_trans #max_trans * np.sin(2.0 * np.pi * float(i) / float(num_frames))
+    x_trans = view_trans_x #max_trans * np.sin(2.0 * np.pi * float(i) / float(num_frames))
     y_trans = 0.#max_trans * np.cos(2.0 * np.pi * float(i) / float(num_frames)) / 2.
     z_trans = 0.#max_trans * np.cos(2.0 * np.pi * float(i) / float(num_frames)) / 2.
 
