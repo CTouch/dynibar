@@ -70,7 +70,8 @@ class DynamicVideoDataset(Dataset):
     
     if self.render_idx == -2:
       self.render_idx = list(range(len(rgb_files)))
-      # self.render_idx = self.render_idx[3:-3]
+      self.render_idx = self.render_idx[3:-3]
+      render_poses = render_poses[3:-3]
       assert(len(self.render_idx) == len(render_poses))
     
     near_depth = np.min(bds)
@@ -108,23 +109,33 @@ class DynamicVideoDataset(Dataset):
     train_rgb_files = self.train_rgb_files
     train_poses = self.train_poses
     train_intrinsics = self.train_intrinsics
-
-    rgb_file = train_rgb_files[idx]
+    
+    if isinstance(self.render_idx, list):
+      cur_render_idx = self.render_idx[idx]
+    else:
+      cur_render_idx = self.render_idx
+      
+    rgb_file = train_rgb_files[cur_render_idx]
+    # print(f'rgb_file: {rgb_file}')
+    
     rgb = imageio.imread(rgb_file).astype(np.float32) / 255.0
 
-    h, w = self.h[idx], self.w[idx]
+    h, w = self.h[cur_render_idx], self.w[cur_render_idx]
     camera = np.concatenate(
         ([h, w], intrinsics.flatten(), render_pose.flatten())
     ).astype(np.float32)
 
-    if isinstance(self.render_idx, list):
-      nearest_pose_ids = np.sort(
-        [self.render_idx[idx] + offset for offset in [1, 2, 3, 0, -1, -2, -3]]
-      )
-    else:
-      nearest_pose_ids = np.sort(
-          [self.render_idx + offset for offset in [1, 2, 3, 0, -1, -2, -3]]
-      )
+    nearest_pose_ids = np.sort(
+        [cur_render_idx + offset for offset in [1, 2, 3, 0, -1, -2, -3]]
+    )    
+    # if isinstance(self.render_idx, list):
+    #   nearest_pose_ids = np.sort(
+    #     [self.render_idx[idx] + offset for offset in [1, 2, 3, 0, -1, -2, -3]]
+    #   )
+    # else:
+    #   nearest_pose_ids = np.sort(
+    #       [self.render_idx + offset for offset in [1, 2, 3, 0, -1, -2, -3]]
+    #   )
     sp_pose_ids = get_nearest_pose_ids(
         render_pose, train_poses, tar_id=-1, angular_dist_method='dist'
     )
@@ -139,11 +150,6 @@ class DynamicVideoDataset(Dataset):
         interval=frame_interval,
     )
     
-    if isinstance(self.render_idx, list):
-      cur_render_idx = self.render_idx[idx]
-    else:
-      cur_render_idx = self.render_idx
-      
     for sp_pose_id in interval_pose_ids:
       if len(static_pose_ids) >= (self.num_source_views * 2 + 1):
         break
@@ -174,8 +180,8 @@ class DynamicVideoDataset(Dataset):
     src_rgbs = []
     src_cameras = []
     # print(f'nearest_pose_ids = {nearest_pose_ids}')
-    # print(f'train_rgb_files = {train_rgb_files}')
     for src_idx in nearest_pose_ids:
+      # print(f'train_rgb_files[src_idx] = {train_rgb_files[src_idx]}')
       src_rgb = (
           imageio.imread(train_rgb_files[src_idx]).astype(np.float32) / 255.0
       )

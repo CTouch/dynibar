@@ -324,6 +324,14 @@ def config_parser():
       default=64,
       help='Number of coarse samples per ray',
   )
+  
+  parser.add_argument(
+      '--view_trans_x',
+      type=float,
+      default=0.061,
+      help='Tanslation of x-axis of new novel view path away from original camera path',
+  )
+  
   parser.add_argument(
       '--N_importance',
       type=int,
