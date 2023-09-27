@@ -219,8 +219,7 @@ def config_parser():
   
   parser.add_argument(
       '--use_sep_weight_loss',
-      type=bool,
-      default=False,
+      action='store_true',
       help=(
           'Add seperate (sum dynamic and static) weight loss while training'
       )
@@ -375,8 +374,7 @@ def config_parser():
   
   parser.add_argument(
       '--output_density_and_color',
-      type=bool,
-      default=False,
+      action='store_true',
       help='Flag for whether output density and color'
   )
   

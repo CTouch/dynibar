@@ -296,7 +296,7 @@ if __name__ == '__main__':
   model = DynibarMono(args)
   eval_dataset_name = args.eval_dataset
   extra_out_dir = '{}/{}/{}'.format(
-      eval_dataset_name, args.expname, str(args.render_idx)
+      eval_dataset_name, args.expname, str(args.render_idx) + f'_{args.view_trans_x}'
   )
   print('saving results to {}...'.format(extra_out_dir))
   os.makedirs(extra_out_dir, exist_ok=True)
