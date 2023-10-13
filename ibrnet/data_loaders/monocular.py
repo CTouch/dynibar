@@ -171,7 +171,7 @@ class MonocularDataset(Dataset):
     )
     static_mask = (
         1.0 - imageio.imread(static_mask_path).astype(np.float32) / 255.0
-    )
+    )     # why 1.0 - img? 
 
     static_mask = cv2.resize(
         static_mask,

@@ -83,8 +83,11 @@ if __name__ == '__main__':
     )  # we assume fx ~= fy
 
     original_img_path = os.path.join(
-        data_dir, 'images', '%05d.png' % int(out_name[5:9])
+        data_dir, 'images', '%05d.jpg' % int(out_name[5:9])
     )
+    # original_img_path = os.path.join(
+    #     data_dir, 'images', '%05d.png' % int(out_name[5:9])
+    # )
     o_img = imageio.imread(original_img_path)
     print(o_img.shape, final_w, final_h)
     img_resized = cv2.resize(

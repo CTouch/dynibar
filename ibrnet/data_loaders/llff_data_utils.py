@@ -460,14 +460,10 @@ def render_translate_path(poses, view_trans_x):
   """
   print("Rendering tranlate path from original path")
   
-  assert(abs(view_trans_x) < 0.5)
+  # assert(abs(view_trans_x) < 0.5)
   hwf = poses[0, :, 4:5]
   num_frames = poses.shape[0]
   
-  # max_disp = 48.0
-  # max_trans = max_disp / hwf[2][0]
-  # max_trans = 0.061
-
   output_poses = []
   for i in range(num_frames):
     x_trans = view_trans_x #max_trans * np.sin(2.0 * np.pi * float(i) / float(num_frames))

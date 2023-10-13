@@ -1,4 +1,4 @@
-expname = kid-running-test-sep-weight-loss
+expname = goat_test
 
 rootdir = /data3/Touch/dynibar/
 
@@ -13,9 +13,9 @@ n_iters = 400000
 
 ## dataset
 train_dataset = monocular
-train_scenes = kid-running
+train_scenes = goat
 eval_dataset = monocular
-eval_scenes = kid-running
+eval_scenes = goat
 
 ### TRAINING
 N_rand = 1024       
@@ -51,9 +51,6 @@ cycle_factor = 0.1
 w_disp = 1e-1
 w_flow = 1e-2
 w_distortion = 1e-3
-w_dr_distortion = 1e-3
-w_st_distortion = 1e-4
-
 w_reg = 0.05
 
 w_skew_entropy = 5e-4
@@ -70,5 +67,3 @@ num_source_views = 7
 
 num_vv = 3
 mask_src_view = True
-
-use_sep_weight_loss = True

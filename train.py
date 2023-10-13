@@ -421,10 +421,10 @@ def train(args):
       )
       
       if args.use_sep_weight_loss:
-        distortion_dy_loss = w_distortion * eff_distloss_native(
+        distortion_dy_loss = args.w_dr_distortion * eff_distloss_native(
             ret['outputs_coarse_ref']['weights_dy'][:, :-1], mid_dist, interval
         )
-        distortion_st_loss = w_distortion * eff_distloss_native(
+        distortion_st_loss = args.w_st_distortion * eff_distloss_native(
             ret['outputs_coarse_ref']['weights_st'][:, :-1], mid_dist, interval
         )
         # distortion_loss += distortion_dr_loss + distortion_st_loss

@@ -285,6 +285,18 @@ def config_parser():
       help='Weight of distortion loss',
   )
   parser.add_argument(
+      '--w_dr_distortion',
+      type=float,
+      default=1e-3,
+      help='Weight of dynamic distortion loss',
+  ) 
+  parser.add_argument(
+      '--w_st_distortion',
+      type=float,
+      default=1e-3,
+      help='Weight of static distortion loss',
+  )
+  parser.add_argument(
       '--w_entropy', type=float, default=0.0, help='Weight of entropy loss'
   )
   parser.add_argument(
