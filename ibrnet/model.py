@@ -298,7 +298,7 @@ class DynibarMono(object):
         args,
         in_feat_ch=self.args.coarse_feat_dim,
         n_samples=self.args.N_samples,
-        shift=5.0,
+        shift=5.0,      # shift = 5.0 TODO WHY
     ).to(self.device)
 
     self.net_fine = None
@@ -323,7 +323,7 @@ class DynibarMono(object):
     )
 
     # basis
-    dct_basis = init_dct_basis(args.num_basis, args.num_frames)
+    dct_basis = init_dct_basis(args.num_basis, args.num_frames) # [num_basic, num_frames]
     self.trajectory_basis = (
         torch.nn.parameter.Parameter(dct_basis)
         .float()

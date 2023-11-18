@@ -74,7 +74,7 @@ class RaySamplerSingleImage(object):
         self.H, self.W, normalized_coordinates=False
     )[0].to(
         self.device
-    )  # (H, W, 2)
+    )  # (H, W, 2)    (H, W)?
 
     self.rays_o, self.rays_d = self.get_rays_single_image(
         self.H, self.W, self.intrinsics, self.c2w_mat
@@ -145,11 +145,11 @@ class RaySamplerSingleImage(object):
         c2w[:, :3, :3]
         .bmm(torch.inverse(intrinsics[:, :3, :3]))
         .bmm(batched_pixels)
-    ).transpose(1, 2)               # (B, 3, H*W)
-    rays_d = rays_d.reshape(-1, 3)  # TODO check (B*H*W, 3)
+    ).transpose(1, 2)
+    rays_d = rays_d.reshape(-1, 3)  # (B*H*W, 3)
     rays_o = (
         c2w[:, :3, 3].unsqueeze(1).repeat(1, rays_d.shape[0], 1).reshape(-1, 3)
-    )  # B x HW x 3
+    )  # (B*H*W, 3)
     return rays_o, rays_d
 
   def get_all(self):

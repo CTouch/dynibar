@@ -239,9 +239,9 @@ class DynibarDynamic(nn.Module):
     num_views = rgb_feat.shape[2]
     time_pe = (
         self.t_embed(time)[..., None, :].repeat(1, 1, num_views, 1).float()
-    )
+    )   # [n_rays, n_samples, n_views, 21]
 
-    direction_feat = self.ray_dir_fc(time_pe)
+    direction_feat = self.ray_dir_fc(time_pe)   # [n_rays, n_samples, n_views, 35]
 
     # rgb_in = rgb_feat[..., :3]
     rgb_feat = rgb_feat + direction_feat
@@ -267,10 +267,11 @@ class DynibarDynamic(nn.Module):
     x = torch.cat(
         [globalfeat.expand(-1, -1, num_views, -1), rgb_feat], dim=-1
     )  # [n_rays, n_samples, n_views, 3*n_feat]
-    x = self.base_fc(x)
+    x = self.base_fc(x)   # [n_rays, n_samples, n_views, 128]
 
-    x_vis = self.vis_fc(x * weight)
-    x_res, vis = torch.split(x_vis, [x_vis.shape[-1] - 1, 1], dim=-1)
+    x_vis = self.vis_fc(x * weight) # [n_rays, n_samples, n_views, 128+1]
+    x_res, vis = torch.split(x_vis, [x_vis.shape[-1] - 1, 1], dim=-1) 
+    # x_res [n_rays, n_samples, n_views, 128], vis [n_rays, n_samples, n_views, 1]
     vis = F.sigmoid(vis) * mask
     x = x + x_res
     vis = self.vis_fc2(x * vis) * mask
@@ -279,8 +280,8 @@ class DynibarDynamic(nn.Module):
     mean, var = fused_mean_variance(x, weight)
     globalfeat = torch.cat(
         [mean.squeeze(2), var.squeeze(2), weight.mean(dim=2)], dim=-1
-    )  # [n_rays, n_samples, 32*2+1]
-    globalfeat = self.geometry_fc(globalfeat)  # [n_rays, n_samples, 16]
+    )  #  [n_rays, n_samples, 128*2+1]
+    globalfeat = self.geometry_fc(globalfeat) # [n_rays, n_samples, 128]
     num_valid_obs = torch.sum(mask, dim=2)
 
     globalfeat = globalfeat + self.pos_encoding.to(globalfeat.device)
@@ -288,7 +289,7 @@ class DynibarDynamic(nn.Module):
         globalfeat, globalfeat, globalfeat, mask=(num_valid_obs > 1).float()
     )  # [n_rays, n_samples, 16]
 
-    pts_xyz_pe = self.pts_embed(pts_xyz)
+    pts_xyz_pe = self.pts_embed(pts_xyz)    # [n_rays, n_samples, 33]
     globalfeat = self.ref_pts_fc(torch.cat([globalfeat, pts_xyz_pe], dim=-1))
 
     sigma = (

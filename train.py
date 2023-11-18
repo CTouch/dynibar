@@ -149,11 +149,11 @@ def train(args):
           [
               ray_batch['src_rgbs'].squeeze(0).permute(0, 3, 1, 2),
               ray_batch['anchor_src_rgbs'].squeeze(0).permute(0, 3, 1, 2),
-          ],    # [n_views, 3, h, w]
+          ],
           dim=0,
       )
 
-      cb_featmaps_1, _ = model.feature_net(cb_src_rgbs)
+      cb_featmaps_1, _ = model.feature_net(cb_src_rgbs)     # for dynamic model?
       ref_featmaps, anchor_featmaps = (
           cb_featmaps_1[0:num_dy_views],
           cb_featmaps_1[num_dy_views:],

@@ -43,10 +43,10 @@ class Projector:
         [xyz, torch.ones_like(xyz[..., :1])], dim=-1
     )  # [n_points, 4]
 
+    # TODO check xyz_h.permute(0, 2, 1)
     projections = train_intrinsics.bmm(torch.inverse(train_poses)).bmm(
-        xyz_h.permute(0, 2, 1)
+        xyz_h.permute(0, 2, 1)         
     )  # [n_views, 4, n_points]
-
     projections = projections.permute(0, 2, 1)  # [n_views, n_points, 4]
     pixel_locations = projections[..., :2] / torch.clamp(
         projections[..., 2:3], min=1e-8
@@ -138,7 +138,7 @@ class Projector:
     # compute the projection of the query points to each reference image
     pixel_locations, mask_in_front = self.compute_projections(
         xyz, train_cameras
-    )
+    )   # [n_views, n_rays, n_samples, 2], [n_views, n_rays, n_samples]
 
     normalized_pixel_locations = self.normalize(
         pixel_locations, h, w
@@ -166,7 +166,7 @@ class Projector:
     inbound = self.inbound(pixel_locations, h, w)
     ray_diff = self.compute_angle(
         xyz_st, xyz, query_camera, train_cameras
-    ).detach()
+    ).detach()      # [num_views, n_rays, n_samples, 4]
 
     ray_diff = ray_diff.permute(1, 2, 0, 3)
     mask = (

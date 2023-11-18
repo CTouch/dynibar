@@ -951,19 +951,19 @@ def render_rays_mono(
   )
   N_rays, N_samples = pts_ref.shape[:2]
   num_last_samples = int(round(N_samples * 0.1))
-
+  
   # Scene motion at reference time in global coordinate system
   ref_time_embedding_ = ref_time_embedding[None, None, :].repeat(
       N_rays, N_samples, 1
-  )
+  )     # [n_rays, n_samples, 1]
 
   ref_xyzt = (
       torch.cat([pts_ref, ref_time_embedding_], dim=-1)
       .float()
       .to(pts_ref.device)
-  )
-  raw_coeff_xyz = model.motion_mlp(ref_xyzt)
-  raw_coeff_xyz[:, -num_last_samples:, :] *= 0.0
+  )     # [N_rays, N_samples, 4]
+  raw_coeff_xyz = model.motion_mlp(ref_xyzt)        # [N_rays, N_samples, 3 * num_basis]
+  raw_coeff_xyz[:, -num_last_samples:, :] *= 0.0    # 远的采样点视为背景 静止
 
   num_basis = model.trajectory_basis.shape[1]
   raw_coeff_x = raw_coeff_xyz[..., 0:num_basis]
@@ -978,7 +978,7 @@ def render_rays_mono(
         raw_coeff_y,
         raw_coeff_z,
         model.trajectory_basis[None, None, ref_frame_idx + offset, :],
-    )   # predict traj, TODO check models.trajectory_basis
+    )   
 
     ref_traj_pts_dict[offset] = traj_pts_ref
 
@@ -990,7 +990,7 @@ def render_rays_mono(
 
   # adding src virtual views
   for _ in range(num_vv):
-    pts_3d_seq_ref.append(pts_ref)      # TODO why copy original view?
+    pts_3d_seq_ref.append(pts_ref)
 
   pts_3d_seq_ref = torch.stack(pts_3d_seq_ref, 0)
   pts_3d_static = pts_ref[None, ...].repeat(
@@ -1007,6 +1007,7 @@ def render_rays_mono(
       ray_batch['src_cameras'],
       featmaps=featmaps[0],
   )  # [N_rays, N_samples, N_views, x]
+  # rgb_feat_ref [N_rays, N_samples, N_views, 35] 35 = 3 + d
 
   # Feature query from source view without scene motion,
   # rendering at target view and for static model

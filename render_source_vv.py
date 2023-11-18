@@ -217,7 +217,7 @@ if __name__ == '__main__':
   for ii in range(poses.shape[0]):
     print(ii)
     virtural_poses_0, num_render_0 = render_wander_path(
-        poses[ii], hwf, bd_scale, 56 * 1.5, 
+        poses[ii], hwf, bd_scale, 150, 
         xyz=[0., 1., 1.] # y, x, z
     )
     virtural_poses_1, num_render_1 = render_wander_path(
@@ -257,6 +257,7 @@ if __name__ == '__main__':
     pt_out_path = pt_out_list[i]
 
     out_name = pt_out_path.split('/')[-1]
+    # print(f'pt_out_path: {pt_out_path}')
     pt_data = np.load(pt_out_path)
 
     K = pt_data['K'][0, 0, 0, ...].transpose()
