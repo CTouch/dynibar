@@ -287,10 +287,10 @@ class DynibarDynamic(nn.Module):
     globalfeat = globalfeat + self.pos_encoding.to(globalfeat.device)
     globalfeat, _ = self.ray_attention(
         globalfeat, globalfeat, globalfeat, mask=(num_valid_obs > 1).float()
-    )  # [n_rays, n_samples, 16]
+    )  # [n_rays, n_samples, 128]
 
     pts_xyz_pe = self.pts_embed(pts_xyz)    # [n_rays, n_samples, 33]
-    globalfeat = self.ref_pts_fc(torch.cat([globalfeat, pts_xyz_pe], dim=-1))
+    globalfeat = self.ref_pts_fc(torch.cat([globalfeat, pts_xyz_pe], dim=-1)) # [n_rays, n_samples, 128]
 
     sigma = (
         self.out_geometry_fc(globalfeat) - self.shift
@@ -432,13 +432,13 @@ class DynibarStatic(nn.Module):
       mask,
   ):
     num_views = rgb_feat.shape[2]
-    ref_rays_pe = self.ray_embed(ref_rays_coords)
-    src_rays_pe = self.ray_embed(src_rays_coords)
-    pts_pe = self.pts_embed(pts)
+    ref_rays_pe = self.ray_embed(ref_rays_coords)   # [n_rays, 66]
+    src_rays_pe = self.ray_embed(src_rays_coords)   # [n_rays, n_samples, n_views, 66]
+    pts_pe = self.pts_embed(pts)                    # [n_rays, n_samples, 33]
 
     ref_features = ref_rays_pe[:, None, None, :].expand(
         -1, src_rays_pe.shape[1], src_rays_pe.shape[2], -1
-    )
+    )   # [n_rays, n_samples, n_views, 66]
     src_features = torch.cat(
         [
             pts_pe.unsqueeze(2).expand(-1, -1, src_rays_pe.shape[2], -1),
@@ -485,6 +485,7 @@ class DynibarStatic(nn.Module):
 
     x_vis = self.vis_fc(x * weight)
     x_res, vis = torch.split(x_vis, [x_vis.shape[-1] - 1, 1], dim=-1)
+    # x_res [n_res, n_samples, n_views, 128], vis [n_res, n_samples, n_views, 1]
     vis = F.sigmoid(vis) * mask
     x = x + x_res
     vis = self.vis_fc2(x * vis) * mask
@@ -493,7 +494,7 @@ class DynibarStatic(nn.Module):
     mean, var = fused_mean_variance(x, weight)
     globalfeat = torch.cat(
         [mean.squeeze(2), var.squeeze(2), weight.mean(dim=2)], dim=-1
-    )  # [n_rays, n_samples, 32*2+1]
+    )  # [n_rays, n_samples, 128*2+1]
     globalfeat = self.geometry_fc(globalfeat)  # [n_rays, n_samples, 16]
     num_valid_obs = torch.sum(mask, dim=2)
 
