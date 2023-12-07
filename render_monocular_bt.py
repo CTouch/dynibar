@@ -324,6 +324,12 @@ if __name__ == '__main__':
     os.makedirs(os.path.join(out_scene_dir, 'weights_dy'), exist_ok=True)
     os.makedirs(os.path.join(out_scene_dir, 'weights_st'), exist_ok=True)
 
+  if args.output_raw_coeff:
+    os.makedirs(os.path.join(out_scene_dir, 'raw_coeff'), exist_ok=True)
+
+  if args.output_camera_pose:
+    os.makedirs(os.path.join(out_scene_dir, 'camera_pose'), exist_ok=True)
+
   save_prefix = scene_name
   test_loader = DataLoader(test_dataset, batch_size=1, shuffle=False)
   total_num = len(test_loader)
@@ -412,7 +418,16 @@ if __name__ == '__main__':
     imageio.imwrite(os.path.join(out_scene_dir, 'rgb_st_out', '{}.png'.format(i)),
                     coarse_pred_rgb_st)
     
-    
+    if args.output_raw_coeff:
+      raw_coeff_path = os.path.join(out_scene_dir, 'raw_coeff', 'raw_coeff_ref_{}.npy'.format(i))
+      raw_coeff = ret['raw_coeff'].detach().cpu().numpy()
+      np.save(raw_coeff_path, raw_coeff)
+
+    if args.output_camera_pose:
+      camera_pose_path = os.path.join(out_scene_dir, 'camera_pose', 'camera_pose_{}.npy'.format(i))
+      # camera_pose = ret['camera_pose'].detach().cpu().numpy()
+      camera_pose = ray_batch['camera'].detach().cpu().numpy()
+      np.save(camera_pose_path, camera_pose)
 
     if args.output_density_and_color:
       raw_coarse_ref_path = os.path.join(out_scene_dir, 'raw_coarse_ref', 'raw_coarse_ref_{}.npy'.format(i))

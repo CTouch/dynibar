@@ -965,6 +965,9 @@ def render_rays_mono(
   raw_coeff_xyz = model.motion_mlp(ref_xyzt)        # [N_rays, N_samples, 3 * num_basis]
   raw_coeff_xyz[:, -num_last_samples:, :] *= 0.0    # 远的采样点视为背景 静止
 
+  if args.output_raw_coeff:
+    ret['raw_coeff'] = raw_coeff_xyz
+
   num_basis = model.trajectory_basis.shape[1]
   raw_coeff_x = raw_coeff_xyz[..., 0:num_basis]
   raw_coeff_y = raw_coeff_xyz[..., num_basis : num_basis * 2]
@@ -987,6 +990,11 @@ def render_rays_mono(
     pts_3d_seq_ref.append(
         pts_ref + (ref_traj_pts_dict[offset] - ref_traj_pts_dict[0])
     )
+    # if offset == 1:
+    #     pos_offset = ref_traj_pts_dict[offset] - ref_traj_pts_dict[0]
+    #     offset_len = torch.norm(pos_offset, dim=-1)
+        # print(f'max offset_len:{offset_len.max()}, ref_frame_idx:{ref_frame_idx}, pts_ref.shape:{pts_ref.shape}')
+        # print('max idx: ', offset_len.argmax())
 
   # adding src virtual views
   for _ in range(num_vv):
@@ -1055,8 +1063,8 @@ def render_rays_mono(
 
   raw_coarse_static = model.net_coarse_st(
       pts_ref,
-      ref_rays_coords,      # check this TODO
-      src_rays_coords,      # check thie TODO
+      ref_rays_coords,
+      src_rays_coords,
       rgb_feat_static,
       input_ray_dir,
       ray_diff_static,

@@ -352,7 +352,13 @@ def render_single_image_mono(
         all_ret['mask_static'] = []
 
         all_ret['pts_ref'] = []
-      
+
+      if args.output_raw_coeff:
+        all_ret['raw_coeff'] = []
+        
+      # if args.output_camera_pose:
+      #   all_ret['camera_pose'] = ray_batch['camera']
+        
     if args.output_density_and_color:
       all_ret['raw_coarse_ref'].append(ret['raw_coarse_ref'])
       all_ret['raw_coarse_static'].append(ret['raw_coarse_static'])
@@ -367,6 +373,12 @@ def render_single_image_mono(
       all_ret['mask_static'].append(ret['mask_static'])
 
       all_ret['pts_ref'].append(ret['pts_ref'])
+    
+    if args.output_raw_coeff:
+      all_ret['raw_coeff'].append(ret['raw_coeff'])
+    
+    # if args.output_camera_pose:
+    #   all_ret['camera_pose'].append(ret['camera_pose'])
     
     for k in ret['outputs_coarse_ref']:
       all_ret['outputs_coarse_ref'][k].append(
@@ -405,6 +417,12 @@ def render_single_image_mono(
     all_ret['weights_st'] = torch.cat(all_ret['weights_st'], dim=0)
 
     all_ret['pts_ref'] = torch.cat(all_ret['pts_ref'], dim=0)
+  
+  if args.output_raw_coeff:
+    all_ret['raw_coeff'] = torch.cat(all_ret['raw_coeff'], dim=0)
+  
+  # if args.output_camera_pose:
+  #   all_ret['camera_pose'] = torch.cat(all_ret['camera_pose'], dim=0)
   
   # merge chunk results and reshape
   for k in all_ret['outputs_coarse_ref']:

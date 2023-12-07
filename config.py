@@ -390,6 +390,18 @@ def config_parser():
       help='Flag for whether output density and color'
   )
   
+  parser.add_argument(
+      '--output_raw_coeff',
+      action='store_true',
+      help='Flag for whether output raw coefficients'
+  )
+  
+  parser.add_argument(
+      '--output_camera_pose',
+      action='store_true',
+      help='Flag for whether output camera pose'
+  )
+  
   ########## logging/saving options ##########
   parser.add_argument(
       '--i_print', type=int, default=100, help='Frequency of terminal printout'
